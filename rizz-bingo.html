@@ -52,6 +52,29 @@
     font-size:.95rem;
     font-weight:500;
   }
+  .lang{
+    display:inline-flex;
+    margin-top:14px;
+    background:rgba(255,255,255,.12);
+    border-radius:999px;
+    padding:4px;
+    gap:4px;
+  }
+  .lang button{
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:.85rem;
+    letter-spacing:.5px;
+    color:rgba(255,255,255,.7);
+    background:transparent;
+    border:none;
+    padding:6px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .lang button.active{background:#fff; color:var(--bg1);}
+  .lang button:focus-visible{outline:2px solid #fff; outline-offset:2px;}
 
   .card{
     background:var(--paper);
@@ -209,7 +232,11 @@
 <body>
   <header>
     <div class="title"><span>R</span><span>I</span><span>Z</span><span>Z</span><span> </span>BINGO</div>
-    <div class="subtitle">Dab a square every time he says it. Get 5 in a row.</div>
+    <div class="subtitle" id="subtitle">Dab a square every time he says it. Get 5 in a row.</div>
+    <div class="lang">
+      <button data-lang="en" class="active">EN</button>
+      <button data-lang="pt">PT</button>
+    </div>
   </header>
 
   <div class="card">
@@ -224,7 +251,7 @@
     <button class="btn reset" id="reset">New day</button>
   </div>
 
-  <div class="scoreline"><b id="count">0</b> dabbed · <b id="lines">0</b> line(s)</div>
+  <div class="scoreline"><b id="count">0</b> <span id="lbl-dabbed">dabbed</span> · <b id="lines">0</b> <span id="lbl-lines">line(s)</span></div>
 
   <div class="banner" id="banner"><div class="banner-text">BINGO!</div></div>
 
@@ -237,9 +264,16 @@
     "Charmuta","Be like a gangster","Filha da puta","Oh my god man",
     "Eu não falo portugues mano","Caralho mano",
     "Muito chata","I'm so sleepy","What the fuck?","Porra caralho",
-    "He/she is so fucking rude man","I swear bro","Fucking bitches"
+    "He/she is so fucking rude man","I swear bro","Fucking bitches",
+    "Toma de quatro mi casa","Cala boca piranha","Calm down guys"
   ];
   const FREE_INDEX = 12;
+
+  const I18N = {
+    en:{ subtitle:"Dab a square every time he says it. Get 5 in a row.", shuffle:"Shuffle", reset:"New day", free:"FREE", dabbed:"dabbed", lines:"line(s)" },
+    pt:{ subtitle:"Marque um quadrado cada vez que ele falar. Faça 5 em linha.", shuffle:"Embaralhar", reset:"Novo dia", free:"LIVRE", dabbed:"marcados", lines:"linha(s)" }
+  };
+  let lang = 'en';
 
   const grid = document.getElementById('grid');
   const banner = document.getElementById('banner');
@@ -282,7 +316,8 @@
       btn.className = "cell" + (c.marked?" marked":"") + (c.free?" free":"") + (c.wild?" wild":"");
       btn.setAttribute('aria-pressed', c.marked);
       btn.dataset.i = i;
-      btn.innerHTML = `<span class="dab"></span><span class="label">${c.label}</span>`;
+      const cellLabel = c.free ? I18N[lang].free : c.label;
+      btn.innerHTML = `<span class="dab"></span><span class="label">${cellLabel}</span>`;
       if(!c.free){
         btn.addEventListener('click', ()=>toggle(i, btn));
       }else{
@@ -361,7 +396,25 @@
     updateScore();
   });
 
+  function applyLang(){
+    const t = I18N[lang];
+    document.getElementById('subtitle').textContent = t.subtitle;
+    document.getElementById('shuffle').textContent = t.shuffle;
+    document.getElementById('reset').textContent = t.reset;
+    document.getElementById('lbl-dabbed').textContent = t.dabbed;
+    document.getElementById('lbl-lines').textContent = t.lines;
+    document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+    document.documentElement.lang = lang;
+    render();
+    checkBingo();
+  }
+
+  document.querySelectorAll('.lang button').forEach(b=>{
+    b.addEventListener('click', ()=>{ lang = b.dataset.lang; applyLang(); });
+  });
+
   buildBoard();
+  applyLang();
 </script>
 </body>
 </html>
