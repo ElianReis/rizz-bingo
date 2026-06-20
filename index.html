@@ -379,6 +379,7 @@
     boardStart = null; bingoSeconds = null;
     render();
     updateScore();
+    saveState();
   }
 
   function render(){
@@ -406,6 +407,7 @@
     if(cells[i].marked && boardStart===null) boardStart = Date.now();
     checkBingo();
     updateScore();
+    saveState();
   }
 
   // all 12 winning lines
@@ -471,6 +473,7 @@
     boardStart = null; bingoSeconds = null;
     render();
     updateScore();
+    saveState();
   });
 
   function applyLang(){
@@ -506,6 +509,30 @@
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
   let playerName = lsGet('rizz_name') || "";
+
+  // ---- session persistence: keep the same board + marks across refresh (F5) ----
+  const STATE_KEY = 'rizz_board';
+  function saveState(){
+    lsSet(STATE_KEY, JSON.stringify({
+      cells, completed:[...completedLines], boardStart, bingoSeconds
+    }));
+  }
+  function loadState(){
+    try{
+      const raw = lsGet(STATE_KEY);
+      if(!raw) return false;
+      const s = JSON.parse(raw);
+      if(!Array.isArray(s.cells) || s.cells.length!==25) return false;
+      cells = s.cells;
+      completedLines = new Set(s.completed||[]);
+      boardStart = s.boardStart ?? null;
+      bingoSeconds = s.bingoSeconds ?? null;
+      render();
+      checkBingo();   // re-highlights finished lines; nothing is "fresh" so no celebration
+      updateScore();
+      return true;
+    }catch(e){ return false; }
+  }
 
   function sbHeaders(extra){
     return Object.assign({
@@ -614,7 +641,7 @@
   document.getElementById('lb-overlay').addEventListener('click', e=>{ if(e.target.id==='lb-overlay') closeLB(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLB(); });
 
-  buildBoard();
+  if(!loadState()) buildBoard();   // restore saved board on refresh, else start fresh
   applyLang();
 </script>
 </body>

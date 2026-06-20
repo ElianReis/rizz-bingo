@@ -59,5 +59,9 @@ const PHRASES = [
   "That's not good",
   "Batatas",
   "Don't worry",
-  "Hah?"
+  "Hah?",
+  "Dudu peleleca",
+  "Obrigado",
+  "... I think",
+  "A lot of money"
 ];
