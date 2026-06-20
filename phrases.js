@@ -57,5 +57,6 @@ const PHRASES = [
   "Don't be shy",
   "I'm so honest",
   "That's not good",
-  "Batatas"
+  "Batatas",
+  "Don't worry"
 ];
