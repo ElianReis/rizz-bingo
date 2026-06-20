@@ -132,6 +132,16 @@
   .cell:hover{transform:translateY(-2px);}
   .cell:focus-visible{outline:3px solid var(--G); outline-offset:2px;}
   .cell .label{position:relative; z-index:2; user-select:none;}
+  .cell .label .sub{
+    display:block;
+    margin-top:3px;
+    font-size:.8em;
+    font-weight:400;
+    font-style:italic;
+    line-height:1.05;
+    color:rgba(42,27,61,.38);
+  }
+  .cell.marked .label .sub{color:rgba(255,255,255,.72);}
 
   /* the ink dab — the signature stamp */
   .cell .dab{
@@ -172,7 +182,10 @@
     width:min(560px,100%);
   }
   .btn{
-    flex:1;
+    flex:1 1 0;
+    min-width:0;
+    white-space:nowrap;
+    text-align:center;
     font-family:"Fredoka",sans-serif;
     font-weight:600;
     font-size:1rem;
@@ -228,7 +241,7 @@
     .confetti-piece{display:none;}
   }
 
-  .btn.lb{background:linear-gradient(180deg,#2BB673,#1f9259); flex:0 0 auto; padding:13px 16px;}
+  .btn.lb{background:linear-gradient(180deg,#2BB673,#1f9259);}
 
   .lb-overlay{
     position:fixed; inset:0; background:rgba(15,6,35,.72);
@@ -371,10 +384,10 @@
     let p = 0;
     for(let i=0;i<25;i++){
       if(i===FREE_INDEX){
-        cells.push({label:"FREE", marked:true, free:true, wild:false});
+        cells.push({t:"FREE", marked:true, free:true, wild:false});
       }else{
-        const label = pool[p++];
-        cells.push({label, marked:false, free:false, wild:false});
+        const ph = pool[p++];
+        cells.push({t:ph.t, l:ph.l, en:ph.en, pt:ph.pt, marked:false, free:false, wild:false});
       }
     }
     completedLines = new Set();
@@ -391,8 +404,13 @@
       btn.className = "cell" + (c.marked?" marked":"") + (c.free?" free":"") + (c.wild?" wild":"");
       btn.setAttribute('aria-pressed', c.marked);
       btn.dataset.i = i;
-      const cellLabel = c.free ? I18N[lang].free : c.label;
-      btn.innerHTML = `<span class="dab"></span><span class="label">${cellLabel}</span>`;
+      const original = c.free ? I18N[lang].free : (c.t || c.label || "");
+      let subHtml = "";
+      if(!c.free && c.l && c.l !== lang){
+        const tr = lang==='pt' ? c.pt : c.en;
+        if(tr) subHtml = `<span class="sub">${tr}</span>`;
+      }
+      btn.innerHTML = `<span class="dab"></span><span class="label">${original}${subHtml}</span>`;
       if(!c.free){
         btn.addEventListener('click', ()=>toggle(i, btn));
       }else{
@@ -533,6 +551,9 @@
       if(!raw) return false;
       const s = JSON.parse(raw);
       if(!Array.isArray(s.cells) || s.cells.length!==25) return false;
+      // reject boards saved before the bilingual format (no `t`/`l` fields)
+      const stale = s.cells.some(c=>!c.free && (c.t===undefined || c.l===undefined));
+      if(stale) return false;
       cells = s.cells;
       completedLines = new Set(s.completed||[]);
       boardStart = s.boardStart ?? null;
