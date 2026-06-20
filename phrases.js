@@ -55,5 +55,9 @@ const PHRASES = [
   "Você é gado",
   "Que que isso?",
   "O que falando?",
-  "Por que você brava mano?"
+  "Por que você brava mano?",
+  "Halass",
+  "Muito legal",
+  "Listen listen!",
+  "I'm really sad"
 ];

@@ -498,13 +498,8 @@
     b.addEventListener('click', ()=>{ lang = b.dataset.lang; applyLang(); });
   });
 
-  // ============================================================
-  //  LEADERBOARD (Supabase) — paste your two values below.
-  //  Project URL  : Supabase dashboard → Project → Connect
-  //  Key          : the "publishable" key (sb_publishable_...) or legacy anon key
-  // ============================================================
   const SUPABASE_URL = "https://dzkcsbnkijuutdcthsjj.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_Wq1I-FYYZrAUc0AFF3URXQ_bo8pP5BH";  // publishable key — safe to be public; security is enforced by RLS
+  const SUPABASE_KEY = "sb_publishable_Wq1I-FYYZrAUc0AFF3URXQ_bo8pP5BH";
   const LB_TABLE = "scores";
   const lbReady = ()=> SUPABASE_URL.trim() && SUPABASE_KEY.trim();
 
