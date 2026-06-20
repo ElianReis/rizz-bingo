@@ -55,5 +55,6 @@ const PHRASES = [
   "I'm really sad",
   "Hate or love at the same coin",
   "Don't be shy",
-  "I'm so honest"
+  "I'm so honest",
+  "That's not good"
 ];
