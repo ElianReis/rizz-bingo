@@ -1,10 +1,3 @@
-// ============================================================
-//  RIZZ BINGO PHRASES
-//  Add a new phrase by putting it on its own line inside the
-//  list below, wrapped in quotes and followed by a comma.
-//  e.g.   "Your new phrase here",
-//  Both index.html and rizz-bingo.html read from this file.
-// ============================================================
 const PHRASES = [
   "Everything is going to be fine",
   "Kis omak",
@@ -59,5 +52,8 @@ const PHRASES = [
   "Halass",
   "Muito legal",
   "Listen listen!",
-  "I'm really sad"
+  "I'm really sad",
+  "Hate or love at the same coin",
+  "Don't be shy",
+  "I'm so honest"
 ];
