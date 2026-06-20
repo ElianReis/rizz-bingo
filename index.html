@@ -304,7 +304,7 @@
     <button class="btn lb" id="open-lb">🏆</button>
   </div>
 
-  <div class="scoreline"><b id="count">0</b> <span id="lbl-dabbed">dabbed</span> · <b id="lines">0</b> <span id="lbl-lines">line(s)</span></div>
+  <div class="scoreline"><b id="count">0</b> <span id="lbl-dabbed">dabbed</span> · <b id="lines">0</b> <span id="lbl-lines">line(s)</span> · <b id="total-bingos">0</b> <span id="lbl-bingos">bingos</span></div>
 
   <div class="lb-overlay" id="lb-overlay" hidden>
     <div class="lb-modal">
@@ -334,12 +334,12 @@
     en:{ subtitle:"Dab a square every time he says it. Get 5 in a row.", shuffle:"Shuffle", reset:"New day", free:"FREE", dabbed:"dabbed", lines:"line(s)",
       leaderboard:"Leaderboard", yourName:"Your name", save:"Save result", ranking:"Ranking", recent:"Recent", refresh:"Refresh",
       saved:"Saved!", saveErr:"Couldn't save — check your connection", loadErr:"Couldn't load scores", needName:"Type your name first",
-      noScores:"No scores yet — be the first!", loading:"Loading…", winsShort:"wins", linesShort:"lines",
+      noScores:"No scores yet — be the first!", loading:"Loading…", winsShort:"wins", linesShort:"lines", bingos:"bingos",
       notConfigured:"Leaderboard not set up yet. Add your Supabase URL and key near the top of the script to enable it." },
     pt:{ subtitle:"Marque um quadrado cada vez que ele falar. Faça 5 em linha.", shuffle:"Embaralhar", reset:"Novo dia", free:"LIVRE", dabbed:"marcados", lines:"linha(s)",
       leaderboard:"Placar", yourName:"Seu nome", save:"Salvar resultado", ranking:"Ranking", recent:"Recentes", refresh:"Atualizar",
       saved:"Salvo!", saveErr:"Não foi possível salvar — verifique a conexão", loadErr:"Não foi possível carregar", needName:"Digite seu nome primeiro",
-      noScores:"Ainda sem pontuações — seja o primeiro!", loading:"Carregando…", winsShort:"vit.", linesShort:"linhas",
+      noScores:"Ainda sem pontuações — seja o primeiro!", loading:"Carregando…", winsShort:"vit.", linesShort:"linhas", bingos:"bingos",
       notConfigured:"Placar ainda não configurado. Adicione a URL e a chave do Supabase no início do script para ativar." }
   };
   let lang = 'en';
@@ -348,11 +348,13 @@
   const banner = document.getElementById('banner');
   const countEl = document.getElementById('count');
   const linesEl = document.getElementById('lines');
+  const totalBingosEl = document.getElementById('total-bingos');
 
   let cells = [];          // 25 entries
   let completedLines = new Set();
   let boardStart = null;   // ms when first dab happened
   let bingoSeconds = null; // time to first BINGO
+  let totalBingos = parseInt(lsGet('rizz_bingos') || '0', 10) || 0;  // lifetime BINGO count (lsGet is hoisted)
 
   function shuffle(arr){
     const a = arr.slice();
@@ -422,14 +424,20 @@
 
   function checkBingo(){
     let fresh = false;
+    let newLines = 0;
     LINES.forEach((line,idx)=>{
       const done = line.every(i=>cells[i].marked);
       if(done && !completedLines.has(idx)){
         completedLines.add(idx);
         fresh = true;
+        newLines++;
       }
       if(!done) completedLines.delete(idx);
     });
+    if(newLines>0){
+      totalBingos += newLines;
+      lsSet('rizz_bingos', String(totalBingos));
+    }
     // highlight cells that belong to any completed line
     const lit = new Set();
     completedLines.forEach(idx=>LINES[idx].forEach(i=>lit.add(i)));
@@ -445,6 +453,7 @@
   function updateScore(){
     countEl.textContent = cells.filter(c=>c.marked && !c.free).length;
     linesEl.textContent = completedLines.size;
+    totalBingosEl.textContent = totalBingos;
   }
 
   function celebrate(){
@@ -484,6 +493,7 @@
     document.getElementById('open-lb').textContent = "🏆 " + t.leaderboard;
     document.getElementById('lbl-dabbed').textContent = t.dabbed;
     document.getElementById('lbl-lines').textContent = t.lines;
+    document.getElementById('lbl-bingos').textContent = t.bingos;
     document.getElementById('lb-title').textContent = "🏆 " + t.leaderboard;
     document.getElementById('lb-name').placeholder = t.yourName;
     document.getElementById('lb-save').textContent = t.save;

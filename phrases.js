@@ -63,5 +63,6 @@ const PHRASES = [
   "Dudu peleleca",
   "Obrigado",
   "... I think",
-  "A lot of money"
+  "A lot of money",
+  "Molestado"
 ];
