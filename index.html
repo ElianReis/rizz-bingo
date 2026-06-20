@@ -375,7 +375,7 @@
       noScores:"Ainda sem pontuações — seja o primeiro!", loading:"Carregando…", winsShort:"vit.", linesShort:"linhas", bingos:"bingos",
       notConfigured:"Placar ainda não configurado. Adicione a URL e a chave do Supabase no início do script para ativar." }
   };
-  let lang = 'en';
+  let lang = lsGet('rizz_lang') || 'en';   // remember language across refresh (lsGet is hoisted)
 
   const grid = document.getElementById('grid');
   const banner = document.getElementById('banner');
@@ -546,7 +546,7 @@
   }
 
   document.querySelectorAll('.lang button').forEach(b=>{
-    b.addEventListener('click', ()=>{ lang = b.dataset.lang; applyLang(); });
+    b.addEventListener('click', ()=>{ lang = b.dataset.lang; lsSet('rizz_lang', lang); applyLang(); });
   });
 
   const SUPABASE_URL = "https://dzkcsbnkijuutdcthsjj.supabase.co";
