@@ -297,9 +297,29 @@
     background:rgba(42,27,61,.08); color:var(--ink-text);
   }
   .lb-refresh:hover{background:rgba(42,27,61,.14);}
+
+  /* mascot: the man, stood at the bottom-left */
+  .mascot{
+    position:fixed;
+    left:0;
+    bottom:0;
+    height:92vh;
+    max-height:900px;
+    width:auto;
+    z-index:0;
+    pointer-events:none;
+    filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));
+    user-select:none;
+  }
+  /* keep all the interactive content above the mascot */
+  header, .card, .controls, .scoreline{position:relative; z-index:1;}
+  /* shrink him on medium screens, hide only on phones */
+  @media (max-width:900px){ .mascot{height:70vh; opacity:.9;} }
+  @media (max-width:560px){ .mascot{display:none;} }
 </style>
 </head>
 <body>
+  <img src="man.png" alt="" class="mascot" aria-hidden="true">
   <header>
     <div class="title"><span>R</span><span>I</span><span>Z</span><span>Z</span><span> </span>BINGO</div>
     <div class="subtitle" id="subtitle">Dab a square every time he says it. Get 5 in a row.</div>
