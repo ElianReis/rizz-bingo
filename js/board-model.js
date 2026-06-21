@@ -52,6 +52,8 @@ export class BoardModel {
     this.completed = new Set();
     this.startedAt = null;
     this.bingoSeconds = null;
+    this.totalBingos = 0;
+    Storage.set(KEYS.bingos, "0");
     this.persist();
   }
 

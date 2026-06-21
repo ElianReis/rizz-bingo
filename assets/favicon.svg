@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#FFF7EC" stroke="#FFD93B" stroke-width="4"/>
+  <ellipse cx="32" cy="33" rx="22" ry="21" fill="#FF1F8E"/>
+  <text x="32" y="33" font-family="Fredoka, Arial, sans-serif" font-size="30" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="central">B</text>
+</svg>
