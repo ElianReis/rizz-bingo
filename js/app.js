@@ -47,21 +47,24 @@ const room = new RoomController({
 
 const lobby = new LobbyView({
   i18n,
-  onCreate: nickname => enterRoom(nickname, makeRoomCode()),
-  onJoin: (nickname, code) => enterRoom(nickname, code),
+  onCreate: nickname => enterRoom(nickname, makeRoomCode(), false),
+  onJoin: (nickname, code) => enterRoom(nickname, code, true),
   onSolo: nickname => { room.startSolo(nickname); document.body.classList.add("in-room"); }
 });
 
 chrome.onOpenLeaderboard(() => leaderboard.open());
 
-async function enterRoom(nickname, code){
+async function enterRoom(nickname, code, verify){
   lobby.setBusy(true);
   try {
-    await room.start(code, nickname);
+    await room.start(code, nickname, verify);
     document.body.classList.add("in-room");
     lobby.notify("", false);
   } catch (e) {
-    lobby.notify(i18n.t.connectErr, true);
+    const msg = e.message === "not-found" ? i18n.t.roomNotFound
+      : e.message === "name-taken" ? i18n.t.nameTaken
+      : i18n.t.connectErr;
+    lobby.notify(msg, true);
   } finally {
     lobby.setBusy(false);
   }

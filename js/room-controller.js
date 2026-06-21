@@ -13,22 +13,35 @@ export class RoomController {
     this.session = null;
     this.solo = false;
     this.nickname = "";
+    this.myId = null;
     this.voted = false;
     this.locked = false;
-    this.restarting = false;
+    this.round = 0;
+    this.requestedRound = false;
   }
 
-  async start(code, nickname){
+  async start(code, nickname, verify){
     this.solo = false;
     this.nickname = nickname;
+    this.myId = makePlayerId();
     this.voted = false;
     this.locked = false;
-    this.restarting = false;
+    this.round = 0;
+    this.requestedRound = false;
 
-    this.session = new RoomSession(code, { id: makePlayerId(), nickname });
+    this.session = new RoomSession(code, { id: this.myId, nickname });
     this.session.onPresenceSync(players => this.onSync(players));
     this.session.onBingo(payload => this.declareWin(payload.nickname, false));
+    this.session.onRestart(payload => this.onRestart(payload));
     await this.session.join();
+
+    if (verify) {
+      await new Promise(res => setTimeout(res, 1500));
+      const others = this.session.players().filter(p => p.id !== this.myId);
+      if (others.length === 0) { await this.bail(); throw new Error("not-found"); }
+      const taken = others.some(p => (p.nickname || "").trim().toLowerCase() === nickname.trim().toLowerCase());
+      if (taken) { await this.bail(); throw new Error("name-taken"); }
+    }
 
     this.roomView.setSolo(false);
     this.roomView.showCode(code);
@@ -37,6 +50,11 @@ export class RoomController {
     this.model.build();
     this.board.setLocked(false);
     this.paint();
+  }
+
+  async bail(){
+    await this.session.leave();
+    this.session = null;
   }
 
   startSolo(nickname){
@@ -86,10 +104,9 @@ export class RoomController {
   }
 
   toggleVote(){
-    if (this.solo) { this.restart(); return; }
+    if (this.solo) { this.rebuild(); this.roomView.announce(""); return; }
     this.voted = !this.voted;
     this.session.setVote(this.voted);
-    this.refreshVote();
   }
 
   onSync(players){
@@ -98,34 +115,32 @@ export class RoomController {
     const voted = players.filter(p => p.voteRestart).length;
     this.roomView.setPlayers(players);
     this.roomView.setVote(this.voted, voted, total);
-    if (total > 0 && voted === total && !this.restarting) {
-      this.restarting = true;
-      this.restart();
+
+    const allVoted = total > 0 && voted === total;
+    if (allVoted && !this.requestedRound) {
+      this.requestedRound = true;
+      this.session.announceRestart(this.round);   // every client may send; receivers dedup by round
     }
-    if (voted < total) this.restarting = false;
+    if (!allVoted) this.requestedRound = false;
   }
 
-  refreshVote(){
-    if (!this.players) return;
-    const total = this.players.length;
-    const voted = this.players.filter(p => p.voteRestart).length + (this.voted ? 1 : 0);
-    this.roomView.setVote(this.voted, Math.min(voted, total), total);
+  onRestart({ round }){
+    if (round < this.round) return;        // stale duplicate — already handled
+    this.round = round + 1;
+    this.requestedRound = false;
+    this.rebuild();
+    this.roomView.announce(this.i18n.t.restarting);
+    setTimeout(() => this.roomView.announce(""), 1500);
+    this.session.setVote(false);
+    this.session.setWon(false);
   }
 
-  restart(){
+  rebuild(){
     this.voted = false;
     this.locked = false;
     this.board.setLocked(false);
     this.model.build();
     this.paint();
-    if (!this.solo) {
-      this.roomView.announce(this.i18n.t.restarting);
-      setTimeout(() => this.roomView.announce(""), 1500);
-      this.session.setVote(false);
-      this.session.setWon(false);
-    } else {
-      this.roomView.announce("");
-    }
   }
 
   applyLang(){

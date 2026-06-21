@@ -5,7 +5,11 @@ const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 let client = null;
 function getClient(){
-  if (!client) client = createClient(SUPABASE_URL, SUPABASE_KEY);
+  if (!client) {
+    client = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      realtime: { params: { eventsPerSecond: 30 } }
+    });
+  }
   return client;
 }
 
@@ -25,14 +29,16 @@ export class RoomSession {
     this.code = code;
     this.state = { id: identity.id, nickname: identity.nickname, voteRestart: false, won: false };
     this.channel = getClient().channel(ROOM_PREFIX + code, {
-      config: { presence: { key: identity.id } }
+      config: { presence: { key: identity.id }, broadcast: { self: true } }
     });
     this.presenceHandler = null;
     this.bingoHandler = null;
+    this.restartHandler = null;
   }
 
   onPresenceSync(handler){ this.presenceHandler = handler; }
   onBingo(handler){ this.bingoHandler = handler; }
+  onRestart(handler){ this.restartHandler = handler; }
 
   players(){
     const presence = this.channel.presenceState();
@@ -45,6 +51,9 @@ export class RoomSession {
     });
     this.channel.on("broadcast", { event: "bingo" }, ({ payload }) => {
       if (this.bingoHandler) this.bingoHandler(payload);
+    });
+    this.channel.on("broadcast", { event: "restart" }, ({ payload }) => {
+      if (this.restartHandler) this.restartHandler(payload);
     });
     return new Promise((resolve, reject) => {
       this.channel.subscribe(async status => {
@@ -60,6 +69,10 @@ export class RoomSession {
 
   announceBingo(){
     return this.channel.send({ type: "broadcast", event: "bingo", payload: { nickname: this.state.nickname } });
+  }
+
+  announceRestart(round){
+    return this.channel.send({ type: "broadcast", event: "restart", payload: { round } });
   }
 
   setVote(value){

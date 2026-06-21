@@ -16,7 +16,7 @@ const STRINGS = {
     tagline: "Play bingo with your friends in real time.",
     nickname: "Your nickname", createRoom: "Create room", joinRoom: "Join room", playSolo: "Play solo", newBoard: "New board",
     roomCode: "Room code", enterCode: "Enter a room code", enterNickname: "Type a nickname first",
-    connecting: "Connecting…", connectErr: "Couldn't connect — try again",
+    connecting: "Connecting…", connectErr: "Couldn't connect — try again", roomNotFound: "Room not found", nameTaken: "That nickname is taken in this room",
     code: "Code", copy: "Copy", copied: "Copied!", players: "players",
     voteRestart: "Vote restart", leave: "Leave", waiting: "Waiting for players…",
     didBingo: "did the BINGO!", youBingo: "You got the BINGO!", restarting: "New round!"
@@ -35,7 +35,7 @@ const STRINGS = {
     tagline: "Jogue bingo com seus amigos em tempo real.",
     nickname: "Seu apelido", createRoom: "Criar sala", joinRoom: "Entrar na sala", playSolo: "Jogar sozinho", newBoard: "Novo quadro",
     roomCode: "Código da sala", enterCode: "Digite um código de sala", enterNickname: "Digite um apelido primeiro",
-    connecting: "Conectando…", connectErr: "Não foi possível conectar — tente de novo",
+    connecting: "Conectando…", connectErr: "Não foi possível conectar — tente de novo", roomNotFound: "Sala não encontrada", nameTaken: "Esse apelido já está em uso nesta sala",
     code: "Código", copy: "Copiar", copied: "Copiado!", players: "jogadores",
     voteRestart: "Votar reinício", leave: "Sair", waiting: "Aguardando jogadores…",
     didBingo: "fez BINGO!", youBingo: "Você fez BINGO!", restarting: "Nova rodada!"
