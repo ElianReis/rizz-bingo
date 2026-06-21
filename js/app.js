@@ -6,8 +6,11 @@ import { Celebration } from "./celebration.js";
 import { LeaderboardService } from "./leaderboard-service.js";
 import { LeaderboardView } from "./leaderboard-view.js";
 import { MusicController } from "./music.js";
+import { startFpsMeter } from "./fps-meter.js";
 
 const byId = id => document.getElementById(id);
+
+if (new URLSearchParams(location.search).has("fps")) startFpsMeter();
 
 const i18n = new I18n();
 const model = new BoardModel();

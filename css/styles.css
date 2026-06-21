@@ -164,13 +164,13 @@ header{text-align:center; margin-bottom:18px;}
   height:88%;
   border-radius:50% 48% 52% 49% / 49% 52% 48% 51%;
   background:radial-gradient(circle at 38% 34%, #ff5fb0, var(--dab) 70%);
-  mix-blend-mode:multiply;
   opacity:0;
   transform:scale(0) rotate(-25deg);
   z-index:1;
   pointer-events:none;
 }
 .cell.marked .dab{
+  mix-blend-mode:multiply;
   animation:stamp .28s cubic-bezier(.34,1.56,.64,1) forwards;
 }
 .cell.marked .label{color:#fff; font-weight:600;}
@@ -351,8 +351,7 @@ header{text-align:center; margin-bottom:18px;}
   border:none;
   border-radius:50%;
   cursor:pointer;
-  background:rgba(255,255,255,.14);
-  backdrop-filter:blur(4px);
+  background:rgba(30,20,55,.45);
   transition:background .15s ease, transform .1s ease;
 }
 .music-btn svg{ width:22px; height:22px; fill:#fff; }
