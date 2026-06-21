@@ -1,0 +1,364 @@
+:root{
+  --paper:#FFF7EC;
+  --ink-text:#2A1B3D;
+  --dab:#FF1F8E;
+  --B:#FF4757; --I:#FF8A1F; --N:#2BB673; --G:#2E86FF; --O:#B14EFF;
+  --bg1:#241046; --bg2:#3A1A6B;
+  --shadow:rgba(20,8,45,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+/* Hide the whole UI until JS has applied the saved language + board, then fade in once.
+   <html> keeps the dark base colour so nothing (white box / English text) flashes first. */
+html{ background:#97dbdf; }   /* matches the sky so the pre-reveal load shows no dark flash */
+body:not(.ready){ visibility:hidden; }
+body.ready{ animation:fadeReady .2s ease both; }
+@keyframes fadeReady{ from{opacity:0;} to{opacity:1;} }
+body{
+  position:relative;
+  font-family:"Inter",system-ui,sans-serif;
+  color:var(--ink-text);
+  background:linear-gradient(155deg, var(--bg1), var(--bg2));
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:28px 16px 56px;
+}
+/* pyramid backdrop on a fixed, GPU-composited layer (no repaint while scrolling) */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background:
+    /* overall darkening wash, stronger at the top for title contrast */
+    linear-gradient(to bottom, rgba(12,26,40,.55), rgba(12,26,40,.34)),
+    /* gentle warm glow near the pyramids */
+    radial-gradient(circle at 80% 80%, rgba(255,170,60,.10), transparent 45%),
+    url("../assets/images/bg.webp?v=4") center/cover no-repeat;
+  /* own GPU layer so scrolling never repaints the backdrop */
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+
+header{text-align:center; margin-bottom:18px;}
+.title{
+  font-family:"Fredoka",sans-serif;
+  font-weight:700;
+  font-size:clamp(2.4rem,9vw,3.4rem);
+  letter-spacing:.5px;
+  line-height:.95;
+  color:#fff;
+  text-shadow:0 3px 0 rgba(0,0,0,.25);
+}
+.title span:nth-child(1){color:var(--B);}
+.title span:nth-child(2){color:var(--I);}
+.title span:nth-child(3){color:var(--N);}
+.title span:nth-child(4){color:var(--G);}
+.title span:nth-child(5){color:var(--O);}
+.subtitle{
+  margin-top:8px;
+  color:rgba(255,255,255,.7);
+  font-size:.75rem;
+  font-weight:500;
+}
+.lang{
+  display:inline-flex;
+  margin-top:14px;
+  background:rgba(255,255,255,.12);
+  border-radius:999px;
+  padding:4px;
+  gap:4px;
+}
+.lang button{
+  font-family:"Fredoka",sans-serif;
+  font-weight:600;
+  font-size:.85rem;
+  letter-spacing:.5px;
+  color:rgba(255,255,255,.7);
+  background:transparent;
+  border:none;
+  padding:6px 16px;
+  border-radius:999px;
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease;
+}
+.lang button.active{background:#fff; color:var(--bg1);}
+.lang button:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+
+.card{
+  background:var(--paper);
+  border-radius:22px;
+  padding:16px;
+  width:min(560px,100%);
+  border:4px solid #FFD93B;
+  box-shadow:0 18px 50px var(--shadow), inset 0 0 0 4px rgba(255,255,255,.6);
+  position:relative;
+}
+
+.headers, .grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+}
+.headers{margin-bottom:8px;}
+.col-h{
+  font-family:"Fredoka",sans-serif;
+  font-weight:700;
+  font-size:clamp(1.5rem,6vw,2.1rem);
+  color:#fff;
+  text-align:center;
+  border-radius:12px;
+  padding:6px 0;
+  box-shadow:0 4px 0 rgba(0,0,0,.18);
+}
+.col-h:nth-child(1){background:var(--B);}
+.col-h:nth-child(2){background:var(--I);}
+.col-h:nth-child(3){background:var(--N);}
+.col-h:nth-child(4){background:var(--G);}
+.col-h:nth-child(5){background:var(--O);}
+
+.cell{
+  position:relative;
+  aspect-ratio:1/1;
+  border:none;
+  border-radius:12px;
+  background:#fffefb;
+  box-shadow:inset 0 0 0 2px rgba(42,27,61,.10);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:5px;
+  font-family:"Fredoka",sans-serif;
+  font-weight:500;
+  font-size:clamp(.58rem,2.1vw,.78rem);
+  line-height:1.12;
+  color:var(--ink-text);
+  overflow:hidden;
+  transition:transform .12s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.cell:hover{transform:translateY(-2px);}
+.cell:focus-visible{outline:3px solid var(--G); outline-offset:2px;}
+.cell .label{position:relative; z-index:2; user-select:none;}
+.cell .label .sub{
+  display:block;
+  margin-top:3px;
+  font-size:.8em;
+  font-weight:400;
+  font-style:italic;
+  line-height:1.05;
+  color:rgba(42,27,61,.38);
+}
+.cell.marked .label .sub{color:rgba(255,255,255,.72);}
+
+/* the ink dab — the signature stamp */
+.cell .dab{
+  position:absolute;
+  inset:0;
+  margin:auto;
+  width:88%;
+  height:88%;
+  border-radius:50% 48% 52% 49% / 49% 52% 48% 51%;
+  background:radial-gradient(circle at 38% 34%, #ff5fb0, var(--dab) 70%);
+  mix-blend-mode:multiply;
+  opacity:0;
+  transform:scale(0) rotate(-25deg);
+  z-index:1;
+  pointer-events:none;
+}
+.cell.marked .dab{
+  animation:stamp .28s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.cell.marked .label{color:#fff; font-weight:600;}
+@keyframes stamp{
+  0%{opacity:0; transform:scale(.2) rotate(-25deg);}
+  60%{opacity:.96; transform:scale(1.08) rotate(4deg);}
+  100%{opacity:.94; transform:scale(1) rotate(0deg);}
+}
+
+.cell.free{background:#FFE7B3; box-shadow:inset 0 0 0 2px rgba(255,138,31,.5);}
+.cell.free .label{font-weight:700; color:#A65A00;}
+
+.cell.in-line{box-shadow:inset 0 0 0 3px #FFD93B, 0 0 0 2px #FFD93B;}
+
+/* controls */
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+  width:min(560px,100%);
+}
+.btn{
+  flex:1 1 0;
+  min-width:0;
+  white-space:nowrap;
+  text-align:center;
+  font-family:"Fredoka",sans-serif;
+  font-weight:600;
+  font-size:1rem;
+  padding:13px 10px;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  color:#fff;
+  box-shadow:0 5px 0 rgba(0,0,0,.22);
+  transition:transform .1s ease, box-shadow .1s ease;
+}
+.btn:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.22);}
+.btn.shuffle{background:linear-gradient(180deg,#2E86FF,#1f6ad6);}
+.btn.reset{background:linear-gradient(180deg,#FF8A1F,#e0710c);}
+
+.scoreline{
+  margin-top:14px;
+  color:rgba(255,255,255,.85);
+  font-weight:500;
+  font-size:.95rem;
+}
+.scoreline b{color:#fff;}
+
+/* BINGO banner */
+.banner{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  z-index:50;
+  opacity:0;
+}
+.banner.show{animation:bannerPop 1.8s ease forwards;}
+.banner-text{
+  font-family:"Fredoka",sans-serif;
+  font-weight:700;
+  font-size:clamp(3rem,18vw,7rem);
+  color:#fff;
+  text-shadow:0 0 24px var(--dab), 0 6px 0 rgba(0,0,0,.3);
+  transform:scale(.5) rotate(-6deg);
+}
+.banner.show .banner-text{animation:textPop 1.8s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes bannerPop{0%{opacity:0;}10%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
+@keyframes textPop{0%{transform:scale(.5) rotate(-6deg);}40%{transform:scale(1.1) rotate(3deg);}100%{transform:scale(1) rotate(0);}}
+
+.confetti-piece{position:fixed; top:-12px; width:9px; height:14px; z-index:40; pointer-events:none; border-radius:2px;}
+
+@media (prefers-reduced-motion: reduce){
+  .cell.marked .dab{animation:none; opacity:.94; transform:scale(1);}
+  .banner.show, .banner.show .banner-text{animation:none; opacity:1; transform:none;}
+  .confetti-piece{display:none;}
+}
+
+.btn.lb{background:linear-gradient(180deg,#2BB673,#1f9259);}
+
+.lb-overlay{
+  position:fixed; inset:0; background:rgba(15,6,35,.72);
+  display:flex; align-items:flex-start; justify-content:center;
+  padding:24px 14px; z-index:60; overflow:auto;
+}
+.lb-overlay[hidden]{display:none;}
+.lb-modal{
+  background:var(--paper); color:var(--ink-text);
+  width:min(460px,100%); border-radius:20px; padding:22px;
+  box-shadow:0 22px 60px rgba(0,0,0,.5); position:relative;
+}
+.lb-close{
+  position:absolute; top:10px; right:14px; border:none; background:transparent;
+  font-size:1.9rem; line-height:1; cursor:pointer; color:var(--ink-text); opacity:.55;
+}
+.lb-close:hover{opacity:1;}
+.lb-title{font-family:"Fredoka",sans-serif; font-size:1.55rem; margin-bottom:14px;}
+.lb-me{display:flex; gap:8px; margin-bottom:8px;}
+.lb-name{
+  flex:1; border:2px solid rgba(42,27,61,.18); border-radius:12px;
+  padding:10px 12px; font-family:"Inter",sans-serif; font-size:1rem; color:var(--ink-text);
+}
+.lb-name:focus{outline:none; border-color:var(--G);}
+.btn.save{flex:0 0 auto; background:linear-gradient(180deg,#FF1F8E,#d40f6f); padding:10px 16px; font-size:.95rem; box-shadow:0 4px 0 rgba(0,0,0,.2);}
+.lb-msg{min-height:18px; font-size:.85rem; font-weight:600; margin-bottom:6px;}
+.lb-msg.ok{color:#1f9259;}
+.lb-msg.err{color:#d40f6f;}
+.lb-section-title{font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.05rem; margin:14px 0 8px;}
+.lb-row{
+  display:grid; grid-template-columns:32px 1fr auto auto auto; gap:8px; align-items:center;
+  padding:8px 10px; border-radius:10px; background:#fffdf8;
+  box-shadow:inset 0 0 0 1px rgba(42,27,61,.08); margin-bottom:6px;
+}
+.lb-pos{font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.05rem; text-align:center;}
+.lb-name-cell{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.lb-stat{font-size:.8rem; color:#5a4a6b; white-space:nowrap;}
+.lb-recent-row{
+  display:grid; grid-template-columns:1fr auto auto; gap:8px;
+  font-size:.85rem; padding:6px 10px; color:#5a4a6b;
+}
+.lb-ago{opacity:.7;}
+.lb-empty{padding:14px; text-align:center; color:#5a4a6b; font-size:.9rem; line-height:1.4;}
+.lb-empty.err{color:#d40f6f;}
+.lb-refresh{
+  margin-top:14px; width:100%; border:none; border-radius:12px; cursor:pointer;
+  padding:10px; font-family:"Fredoka",sans-serif; font-weight:600;
+  background:rgba(42,27,61,.08); color:var(--ink-text);
+}
+.lb-refresh:hover{background:rgba(42,27,61,.14);}
+
+/* mascot: the man peeking from BEHIND the white panel (panel sits on top of him) */
+.mascot{
+  position:absolute;
+  bottom:calc(100% - 70px);  /* lower body overlaps into the card and is hidden behind it */
+  left:14px;                 /* above the B column */
+  height:170px;
+  width:auto;
+  z-index:-1;                /* behind the card's background */
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.45));
+  user-select:none;
+  pointer-events:none;
+}
+@media (max-width:560px){ .mascot{height:130px; left:8px; bottom:calc(100% - 52px);} }
+
+/* decorative camel walking along the very bottom of the page (stays at the end, doesn't follow scroll) */
+.camel{
+  position:absolute;
+  bottom:6px;
+  left:0;
+  height:74px;
+  width:auto;
+  z-index:-1;
+  pointer-events:none;
+  user-select:none;
+  will-change:transform;
+  animation:walkAcross 22s linear infinite;
+}
+@keyframes walkAcross{
+  from{ transform:translate3d(-180px,0,0); }
+  to  { transform:translate3d(100vw,0,0); }
+}
+@media (prefers-reduced-motion: reduce){ .camel{animation:none; left:12px;} }
+
+/* music toggle button, fixed top-right */
+.music-btn{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:70;
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  border-radius:50%;
+  cursor:pointer;
+  background:rgba(255,255,255,.14);
+  backdrop-filter:blur(4px);
+  transition:background .15s ease, transform .1s ease;
+}
+.music-btn svg{ width:22px; height:22px; fill:#fff; }
+.music-btn .slash{ stroke:#fff; stroke-width:2.2; stroke-linecap:round; display:none; }
+.music-btn:not(.on) svg{ opacity:.65; }
+.music-btn:not(.on) .slash{ display:block; }
+.music-btn:hover{background:rgba(255,255,255,.24);}
+.music-btn:active{transform:scale(.92);}
+.music-btn.on{background:rgba(255,255,255,.28);}
