@@ -6,6 +6,10 @@ import { Celebration } from "./celebration.js";
 import { LeaderboardService } from "./leaderboard-service.js";
 import { LeaderboardView } from "./leaderboard-view.js";
 import { MusicController } from "./music.js";
+import { LobbyView } from "./lobby-view.js";
+import { RoomView } from "./room-view.js";
+import { RoomController } from "./room-controller.js";
+import { makeRoomCode } from "./realtime-service.js";
 import { startFpsMeter } from "./fps-meter.js";
 
 const byId = id => document.getElementById(id);
@@ -22,38 +26,57 @@ const board = new BoardView({
   linesEl: byId("lines"),
   bingosEl: byId("total-bingos"),
   i18n,
-  onToggle: handleToggle
+  onToggle: index => room.handleToggle(index)
 });
 
 const service = new LeaderboardService();
-const leaderboard = new LeaderboardView({
-  i18n,
-  service,
-  getSnapshot: () => model.snapshot()
-});
-
+const leaderboard = new LeaderboardView({ i18n, service, getSnapshot: () => model.snapshot() });
 const chrome = new ChromeView({ i18n, onLangChange: changeLang });
-
 new MusicController({ audio: byId("song"), button: byId("music-toggle") });
 
-function handleToggle(index){
-  const fresh = model.toggle(index);
-  board.setMarked(index, model.cells[index].marked);
-  board.highlight(model);
-  board.score(model);
-  if (fresh > 0) celebration.fire();
+const roomView = new RoomView({
+  i18n,
+  onVote: () => room.toggleVote(),
+  onLeave: () => room.leave()
+});
+
+const room = new RoomController({
+  i18n, model, board, celebration, service, roomView,
+  onExit: showLobby
+});
+
+const lobby = new LobbyView({
+  i18n,
+  onCreate: nickname => enterRoom(nickname, makeRoomCode()),
+  onJoin: (nickname, code) => enterRoom(nickname, code),
+  onSolo: nickname => { room.startSolo(nickname); document.body.classList.add("in-room"); }
+});
+
+chrome.onOpenLeaderboard(() => leaderboard.open());
+
+async function enterRoom(nickname, code){
+  lobby.setBusy(true);
+  try {
+    await room.start(code, nickname);
+    document.body.classList.add("in-room");
+    lobby.notify("", false);
+  } catch (e) {
+    lobby.notify(i18n.t.connectErr, true);
+  } finally {
+    lobby.setBusy(false);
+  }
 }
 
-function paintBoard(){
-  board.render(model);
-  board.highlight(model);
-  board.score(model);
+function showLobby(){
+  document.body.classList.remove("in-room");
 }
 
 function applyLanguage(){
   chrome.apply();
   leaderboard.apply();
-  paintBoard();
+  lobby.apply();
+  roomView.apply();
+  if (room.session) room.applyLang();
 }
 
 function changeLang(lang){
@@ -61,12 +84,7 @@ function changeLang(lang){
   applyLanguage();
 }
 
-chrome.onShuffle(() => { model.build(); paintBoard(); });
-chrome.onReset(() => { model.clearMarks(); paintBoard(); });
-chrome.onOpenLeaderboard(() => leaderboard.open());
-
 try {
-  if (!model.restore()) model.build();
   applyLanguage();
 } finally {
   document.body.classList.add("ready");

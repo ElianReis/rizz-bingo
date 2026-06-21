@@ -2,8 +2,6 @@ export class ChromeView {
   constructor({ i18n, onLangChange }){
     this.i18n = i18n;
     this.subtitle = document.getElementById("subtitle");
-    this.shuffleBtn = document.getElementById("shuffle");
-    this.resetBtn = document.getElementById("reset");
     this.openLbBtn = document.getElementById("open-lb");
     this.dabbedLabel = document.getElementById("lbl-dabbed");
     this.linesLabel = document.getElementById("lbl-lines");
@@ -18,8 +16,6 @@ export class ChromeView {
   apply(){
     const t = this.i18n.t;
     this.subtitle.textContent = t.subtitle;
-    this.shuffleBtn.textContent = t.shuffle;
-    this.resetBtn.textContent = t.reset;
     this.openLbBtn.textContent = "🏆 " + t.leaderboard;
     this.dabbedLabel.textContent = t.dabbed;
     this.linesLabel.textContent = t.lines;
@@ -30,7 +26,5 @@ export class ChromeView {
     document.documentElement.lang = this.i18n.lang;
   }
 
-  onShuffle(handler){ this.shuffleBtn.addEventListener("click", handler); }
-  onReset(handler){ this.resetBtn.addEventListener("click", handler); }
   onOpenLeaderboard(handler){ this.openLbBtn.addEventListener("click", handler); }
 }

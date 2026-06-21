@@ -6,6 +6,12 @@ export class BoardView {
     this.bingosEl = bingosEl;
     this.i18n = i18n;
     this.onToggle = onToggle;
+    this.locked = false;
+  }
+
+  setLocked(locked){
+    this.locked = locked;
+    this.grid.classList.toggle("locked", locked);
   }
 
   render(model){
@@ -19,7 +25,7 @@ export class BoardView {
       if (cell.free) {
         button.style.cursor = "default";
       } else {
-        button.addEventListener("click", () => this.onToggle(i));
+        button.addEventListener("click", () => { if (!this.locked) this.onToggle(i); });
       }
       this.grid.appendChild(button);
     });

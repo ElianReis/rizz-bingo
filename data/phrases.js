@@ -65,5 +65,8 @@ export const PHRASES = [
   { t:"... I think", l:"en", pt:"... eu acho" },
   { t:"A lot of money", l:"en", pt:"Um monte de dinheiro" },
   { t:"Molestado", l:"pt", en:"Harassed" },
-  { t:"I wanna fuck you", l:"en", pt:"Quero te foder" }
+  { t:"I wanna fuck you", l:"en", pt:"Quero te foder" },
+  { t:"Racist", l:"en", pt:"Racista"},
+  { t:"Gay", l:"en", pt:"Gay"},
+  { t:"Tadinha", l:"pt", en:"Poor thing"}
 ];

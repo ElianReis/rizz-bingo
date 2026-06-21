@@ -5,6 +5,9 @@ export const SUPABASE_URL = "https://dzkcsbnkijuutdcthsjj.supabase.co";
 export const SUPABASE_KEY = "sb_publishable_Wq1I-FYYZrAUc0AFF3URXQ_bo8pP5BH";
 export const LB_TABLE = "scores";
 
+export const ROOM_PREFIX = "room:";
+export const ROOM_CODE_LENGTH = 5;
+
 export const KEYS = {
   lang: "rizz_lang",
   bingos: "rizz_bingos",

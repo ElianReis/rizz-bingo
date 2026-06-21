@@ -10,7 +10,7 @@
 <!-- load fonts without blocking render/JS; they swap in when ready -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
-<link rel="stylesheet" href="css/styles.css?v=2">
+<link rel="stylesheet" href="css/styles.css?v=7">
 </head>
 <body>
   <audio id="song" src="assets/audio/song.mp3" loop preload="none"></audio>
@@ -30,21 +30,48 @@
     </div>
   </header>
 
-  <div class="card">
-    <img src="assets/images/man.webp?v=1" alt="" class="mascot" aria-hidden="true" decoding="async">
-    <div class="headers">
-      <div class="col-h">B</div><div class="col-h">I</div><div class="col-h">N</div><div class="col-h">G</div><div class="col-h">O</div>
+  <section id="lobby">
+    <div class="lobby-card">
+      <p class="lobby-tagline" id="lobby-tagline"></p>
+      <input id="nickname" class="lobby-input" maxlength="20" autocomplete="off">
+      <button class="btn create" id="create-btn"></button>
+      <div class="lobby-or">·</div>
+      <div class="join-row">
+        <input id="join-code" class="lobby-input code" maxlength="5" autocomplete="off">
+        <button class="btn join" id="join-btn"></button>
+      </div>
+      <div class="lobby-msg" id="lobby-msg"></div>
+      <button class="btn solo" id="solo-btn"></button>
     </div>
-    <div class="grid" id="grid"></div>
-  </div>
+  </section>
 
-  <div class="controls">
-    <button class="btn shuffle" id="shuffle"></button>
-    <button class="btn reset" id="reset"></button>
-    <button class="btn lb" id="open-lb">🏆</button>
-  </div>
+  <section id="game">
+    <div id="room-bar">
+      <button id="room-code" class="room-code" aria-label="Copy room code"><span id="rc-label" class="rc-label"></span> <b id="rc-value">—</b></button>
+      <div class="room-players-wrap" id="room-players-wrap">
+        <button id="room-players" class="room-players" aria-expanded="false"></button>
+        <div id="room-playerlist" class="room-playerlist" hidden></div>
+      </div>
+    </div>
 
-  <div class="scoreline"><b id="count">0</b> <span id="lbl-dabbed"></span> · <b id="lines">0</b> <span id="lbl-lines"></span> · <b id="total-bingos">0</b> <span id="lbl-bingos"></span></div>
+    <div class="room-announce" id="room-announce"></div>
+
+    <div class="card">
+      <img src="assets/images/man.webp?v=1" alt="" class="mascot" aria-hidden="true" decoding="async">
+      <div class="headers">
+        <div class="col-h">B</div><div class="col-h">I</div><div class="col-h">N</div><div class="col-h">G</div><div class="col-h">O</div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn vote" id="vote-btn"></button>
+      <button class="btn leave-btn" id="leave-btn"></button>
+      <button class="btn lb" id="open-lb">🏆</button>
+    </div>
+
+    <div class="scoreline"><b id="count">0</b> <span id="lbl-dabbed"></span> · <b id="lines">0</b> <span id="lbl-lines"></span> · <b id="total-bingos">0</b> <span id="lbl-bingos"></span></div>
+  </section>
 
   <div class="lb-overlay" id="lb-overlay" hidden>
     <div class="lb-modal">
