@@ -27,18 +27,16 @@ export function makePlayerId(){
 export class RoomSession {
   constructor(code, identity){
     this.code = code;
-    this.state = { id: identity.id, nickname: identity.nickname, voteRestart: false, wonRound: -1 };
+    this.state = { id: identity.id, nickname: identity.nickname, voteRound: -1, wonRound: -1 };
     this.channel = getClient().channel(ROOM_PREFIX + code, {
       config: { presence: { key: identity.id }, broadcast: { self: true } }
     });
     this.presenceHandler = null;
     this.bingoHandler = null;
-    this.restartHandler = null;
   }
 
   onPresenceSync(handler){ this.presenceHandler = handler; }
   onBingo(handler){ this.bingoHandler = handler; }
-  onRestart(handler){ this.restartHandler = handler; }
 
   players(){
     const presence = this.channel.presenceState();
@@ -51,9 +49,6 @@ export class RoomSession {
     });
     this.channel.on("broadcast", { event: "bingo" }, ({ payload }) => {
       if (this.bingoHandler) this.bingoHandler(payload);
-    });
-    this.channel.on("broadcast", { event: "restart" }, ({ payload }) => {
-      if (this.restartHandler) this.restartHandler(payload);
     });
     return new Promise((resolve, reject) => {
       this.channel.subscribe(async status => {
@@ -71,12 +66,8 @@ export class RoomSession {
     return this.channel.send({ type: "broadcast", event: "bingo", payload: { nickname: this.state.nickname } });
   }
 
-  announceRestart(round){
-    return this.channel.send({ type: "broadcast", event: "restart", payload: { round } });
-  }
-
-  setVote(value){
-    this.state.voteRestart = value;
+  setVoteRound(round){
+    this.state.voteRound = round;
     return this.channel.track(this.state);
   }
 
@@ -85,8 +76,8 @@ export class RoomSession {
     return this.channel.track(this.state);
   }
 
-  async leave(){
-    try { await this.channel.untrack(); } catch (e) {}
-    getClient().removeChannel(this.channel);
+  leave(){
+    try { this.channel.untrack(); } catch (e) {}   // fire-and-forget; don't block the UI
+    getClient().removeChannel(this.channel);        // unsubscribe locally; server drops our presence
   }
 }

@@ -10,7 +10,7 @@ import { Mascot } from "./mascot.js";
 import { LobbyView } from "./lobby-view.js";
 import { RoomView } from "./room-view.js";
 import { RoomController } from "./room-controller.js";
-import { makeRoomCode } from "./realtime-service.js";
+import { RoomSession, makeRoomCode, makePlayerId } from "./realtime-service.js";
 import { startFpsMeter } from "./fps-meter.js";
 
 const byId = id => document.getElementById(id);
@@ -44,7 +44,9 @@ const roomView = new RoomView({
 
 const room = new RoomController({
   i18n, model, board, celebration, service, roomView,
-  onExit: showLobby
+  onExit: showLobby,
+  createSession: (code, identity) => new RoomSession(code, identity),
+  makeId: makePlayerId
 });
 
 const lobby = new LobbyView({
