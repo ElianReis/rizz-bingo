@@ -10,7 +10,7 @@
 <!-- load fonts without blocking render/JS; they swap in when ready -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"></noscript>
-<link rel="stylesheet" href="css/styles.css?v=7">
+<link rel="stylesheet" href="css/styles.css?v=11">
 </head>
 <body>
   <audio id="song" src="assets/audio/song.mp3" loop preload="none"></audio>
@@ -24,11 +24,12 @@
   <header>
     <div class="title"><span>R</span><span>I</span><span>Z</span><span>Z</span><span> </span>BINGO</div>
     <div class="subtitle" id="subtitle"></div>
-    <div class="lang">
-      <button data-lang="en" class="active">EN</button>
-      <button data-lang="pt">PT</button>
-    </div>
   </header>
+
+  <div class="lang">
+    <button data-lang="en" class="active" aria-label="English" title="English">🇺🇸</button>
+    <button data-lang="pt" aria-label="Português" title="Português">🇧🇷</button>
+  </div>
 
   <section id="lobby">
     <div class="lobby-card">
@@ -57,7 +58,9 @@
     <div class="room-announce" id="room-announce"></div>
 
     <div class="card">
-      <img src="assets/images/man.webp?v=1" alt="" class="mascot" aria-hidden="true" decoding="async">
+      <img src="assets/images/man.webp?v=1" alt="" class="mascot" id="mascot" decoding="async">
+      <button class="mascot-hit" id="mascot-hit" aria-label="Tap the man"></button>
+      <div class="mascot-balloon" id="mascot-balloon" hidden></div>
       <div class="headers">
         <div class="col-h">B</div><div class="col-h">I</div><div class="col-h">N</div><div class="col-h">G</div><div class="col-h">O</div>
       </div>
@@ -77,11 +80,6 @@
     <div class="lb-modal">
       <button class="lb-close" id="lb-close" aria-label="Close">×</button>
       <div class="lb-title" id="lb-title">🏆 Leaderboard</div>
-      <div class="lb-me">
-        <input id="lb-name" class="lb-name" placeholder="Your name" maxlength="20">
-        <button class="btn save" id="lb-save">Save result</button>
-      </div>
-      <div class="lb-msg" id="lb-msg"></div>
       <div class="lb-section-title" id="lb-rank-title">Ranking</div>
       <div id="lb-rank"></div>
       <div class="lb-section-title" id="lb-recent-title">Recent</div>

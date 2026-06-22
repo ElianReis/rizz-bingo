@@ -6,6 +6,7 @@ import { Celebration } from "./celebration.js";
 import { LeaderboardService } from "./leaderboard-service.js";
 import { LeaderboardView } from "./leaderboard-view.js";
 import { MusicController } from "./music.js";
+import { Mascot } from "./mascot.js";
 import { LobbyView } from "./lobby-view.js";
 import { RoomView } from "./room-view.js";
 import { RoomController } from "./room-controller.js";
@@ -30,9 +31,10 @@ const board = new BoardView({
 });
 
 const service = new LeaderboardService();
-const leaderboard = new LeaderboardView({ i18n, service, getSnapshot: () => model.snapshot() });
+const leaderboard = new LeaderboardView({ i18n, service });
 const chrome = new ChromeView({ i18n, onLangChange: changeLang });
 new MusicController({ audio: byId("song"), button: byId("music-toggle") });
+new Mascot();
 
 const roomView = new RoomView({
   i18n,
@@ -79,7 +81,7 @@ function applyLanguage(){
   leaderboard.apply();
   lobby.apply();
   roomView.apply();
-  if (room.session) room.applyLang();
+  if (room.session || room.solo) room.applyLang();
 }
 
 function changeLang(lang){

@@ -64,27 +64,28 @@ header{text-align:center; margin-bottom:18px;}
   font-weight:500;
 }
 .lang{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:70;
   display:inline-flex;
-  margin-top:14px;
-  background:rgba(255,255,255,.12);
+  background:rgba(20,20,55,.45);
   border-radius:999px;
   padding:4px;
-  gap:4px;
+  gap:2px;
 }
 .lang button{
-  font-family:"Fredoka",sans-serif;
-  font-weight:600;
-  font-size:.85rem;
-  letter-spacing:.5px;
-  color:rgba(255,255,255,.7);
+  font-size:1.15rem;
+  line-height:1;
   background:transparent;
   border:none;
-  padding:6px 16px;
+  padding:6px 9px;
   border-radius:999px;
   cursor:pointer;
-  transition:background .15s ease, color .15s ease;
+  opacity:.5;
+  transition:opacity .15s ease, background .15s ease;
 }
-.lang button.active{background:#fff; color:var(--bg1);}
+.lang button.active{background:rgba(255,255,255,.3); opacity:1;}
 .lang button:focus-visible{outline:2px solid #fff; outline-offset:2px;}
 
 .card{
@@ -181,7 +182,7 @@ header{text-align:center; margin-bottom:18px;}
 }
 
 .cell.free{background:#FFE7B3; box-shadow:inset 0 0 0 2px rgba(255,138,31,.5);}
-.cell.free .label{font-weight:700; color:#A65A00;}
+.cell.free .label{font-weight:700; color:#fff;}
 
 .cell.in-line{box-shadow:inset 0 0 0 3px #FFD93B, 0 0 0 2px #FFD93B;}
 
@@ -315,8 +316,61 @@ header{text-align:center; margin-bottom:18px;}
   z-index:-1;                /* behind the card's background */
   filter:drop-shadow(0 6px 12px rgba(0,0,0,.45));
   user-select:none;
+  cursor:pointer;
+}
+
+/* transparent click target covering the whole visible man */
+.mascot-hit{
+  position:absolute;
+  bottom:100%;
+  left:50%;
+  transform:translateX(-50%);
+  width:122px;
+  height:108px;
+  padding:0;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  z-index:6;
+}
+@media (max-width:560px){ .mascot-hit{ width:94px; height:84px; } }
+
+/* speech balloon when you tap the man */
+.mascot-balloon{
+  position:absolute;
+  bottom:calc(100% + 96px);
+  left:calc(50% + 56px);
+  transform:translateX(-50%);
+  z-index:6;
+  max-width:180px;
+  background:#fff;
+  color:var(--ink-text);
+  border:3px solid #FFD93B;
+  border-radius:14px;
+  padding:8px 12px;
+  font-family:"Fredoka",sans-serif;
+  font-weight:600;
+  font-size:.85rem;
+  text-align:center;
+  line-height:1.2;
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
   pointer-events:none;
 }
+.mascot-balloon[hidden]{ display:none; }
+.mascot-balloon::after{
+  content:"";
+  position:absolute;
+  top:100%;
+  left:28px;
+  border:9px solid transparent;
+  border-top-color:#fff;
+}
+.mascot-balloon.pop{ animation:balloonPop .25s cubic-bezier(.34,1.56,.64,1); }
+@keyframes balloonPop{
+  from{ transform:translateX(-50%) scale(.5); opacity:0; }
+  to{ transform:translateX(-50%) scale(1); opacity:1; }
+}
+@media (max-width:560px){ .mascot-balloon{ left:calc(50% + 40px); bottom:calc(100% + 70px); } }
 @media (max-width:560px){ .mascot{height:130px; bottom:calc(100% - 52px);} }
 
 /* decorative camel walking along the very bottom of the page (stays at the end, doesn't follow scroll) */
@@ -338,11 +392,11 @@ header{text-align:center; margin-bottom:18px;}
 }
 @media (prefers-reduced-motion: reduce){ .camel{animation:none; left:12px;} }
 
-/* music toggle button, fixed top-right */
+/* music toggle button, fixed top-left */
 .music-btn{
   position:fixed;
   top:14px;
-  right:14px;
+  left:14px;
   z-index:70;
   width:44px;
   height:44px;

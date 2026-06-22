@@ -1,22 +1,15 @@
-import { Storage } from "./storage.js";
-import { KEYS } from "./config.js";
 import { escapeHtml, formatTime, formatAgo } from "./format.js";
 import { rankPlayers } from "./leaderboard-service.js";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
 export class LeaderboardView {
-  constructor({ i18n, service, getSnapshot }){
+  constructor({ i18n, service }){
     this.i18n = i18n;
     this.service = service;
-    this.getSnapshot = getSnapshot;
-    this.playerName = Storage.get(KEYS.name) || "";
 
     this.overlay = document.getElementById("lb-overlay");
     this.title = document.getElementById("lb-title");
-    this.nameInput = document.getElementById("lb-name");
-    this.saveBtn = document.getElementById("lb-save");
-    this.message = document.getElementById("lb-msg");
     this.rankTitle = document.getElementById("lb-rank-title");
     this.recentTitle = document.getElementById("lb-recent-title");
     this.rankEl = document.getElementById("lb-rank");
@@ -24,7 +17,6 @@ export class LeaderboardView {
     this.refreshBtn = document.getElementById("lb-refresh");
     this.closeBtn = document.getElementById("lb-close");
 
-    this.saveBtn.addEventListener("click", () => this.submit());
     this.refreshBtn.addEventListener("click", () => this.load());
     this.closeBtn.addEventListener("click", () => this.close());
     this.overlay.addEventListener("click", e => { if (e.target === this.overlay) this.close(); });
@@ -38,8 +30,6 @@ export class LeaderboardView {
   apply(){
     const t = this.i18n.t;
     this.title.textContent = "🏆 " + t.leaderboard;
-    this.nameInput.placeholder = t.yourName;
-    this.saveBtn.textContent = t.save;
     this.rankTitle.textContent = t.ranking;
     this.recentTitle.textContent = t.recent;
     this.refreshBtn.textContent = t.refresh;
@@ -47,35 +37,12 @@ export class LeaderboardView {
   }
 
   open(){
-    this.nameInput.value = this.playerName;
     this.overlay.hidden = false;
     this.load();
   }
 
   close(){
     this.overlay.hidden = true;
-  }
-
-  notify(text, isError){
-    this.message.textContent = text;
-    this.message.className = "lb-msg" + (isError ? " err" : " ok");
-    if (text) setTimeout(() => { if (this.message.textContent === text) this.message.textContent = ""; }, 3000);
-  }
-
-  async submit(){
-    const t = this.i18n.t;
-    const name = (this.nameInput.value || "").trim();
-    if (!name) return this.notify(t.needName, true);
-    if (!this.service.ready) return this.notify(t.notConfigured, true);
-    this.playerName = name;
-    Storage.set(KEYS.name, name);
-    try {
-      await this.service.submit({ name, ...this.getSnapshot() });
-      this.notify(t.saved, false);
-      this.load();
-    } catch (e) {
-      this.notify(t.saveErr, true);
-    }
   }
 
   async load(){
@@ -101,7 +68,14 @@ export class LeaderboardView {
           <span class="lb-stat">🔥${player.best}</span>
           <span class="lb-stat">⏱${formatTime(player.fastest)}</span>
         </div>`).join("");
-      this.recentEl.innerHTML = rows.slice(0, 12).map(row => `
+      const seen = new Set();
+      const recent = rows.filter(row => {
+        const key = (row.name || "").trim().toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).slice(0, 12);
+      this.recentEl.innerHTML = recent.map(row => `
         <div class="lb-recent-row">
           <span>${escapeHtml(row.name)}</span>
           <span>${row.won ? "🎉 " + row.lines : (row.lines || 0) + " " + t.linesShort}</span>

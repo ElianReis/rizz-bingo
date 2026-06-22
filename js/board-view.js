@@ -15,20 +15,23 @@ export class BoardView {
   }
 
   render(model){
-    this.grid.innerHTML = "";
+    const frag = document.createDocumentFragment();
+    this.cellEls = [];
     model.cells.forEach((cell, i) => {
       const button = document.createElement("button");
       button.className = "cell" + (cell.marked ? " marked" : "") + (cell.free ? " free" : "");
       button.setAttribute("aria-pressed", cell.marked);
-      button.dataset.i = i;
       button.innerHTML = `<span class="dab"></span><span class="label">${this.labelHtml(cell)}</span>`;
       if (cell.free) {
         button.style.cursor = "default";
       } else {
         button.addEventListener("click", () => { if (!this.locked) this.onToggle(i); });
       }
-      this.grid.appendChild(button);
+      this.cellEls.push(button);
+      frag.appendChild(button);
     });
+    this.grid.innerHTML = "";
+    this.grid.appendChild(frag);
   }
 
   labelHtml(cell){
@@ -43,7 +46,7 @@ export class BoardView {
   }
 
   setMarked(index, marked){
-    const button = this.grid.querySelector(`.cell[data-i="${index}"]`);
+    const button = this.cellEls[index];
     if (!button) return;
     button.classList.toggle("marked", marked);
     button.setAttribute("aria-pressed", marked);
@@ -51,9 +54,7 @@ export class BoardView {
 
   highlight(model){
     const lit = model.litCells();
-    this.grid.querySelectorAll(".cell").forEach(el => {
-      el.classList.toggle("in-line", lit.has(Number(el.dataset.i)));
-    });
+    this.cellEls.forEach((el, i) => el.classList.toggle("in-line", lit.has(i)));
   }
 
   score(model){

@@ -53,7 +53,7 @@ export class RoomView {
       this.playersEl.hidden = true;
       this.closeList();
     }
-    this.renderList();
+    if (!this.listEl.hidden) this.renderList();   // only rebuild the list DOM while it's open
   }
 
   renderList(){
