@@ -58,7 +58,7 @@ export class RoomView {
 
   renderList(){
     this.listEl.innerHTML = this.players.map(p => {
-      const tag = p.won ? "🏆" : p.voteRestart ? "✓" : "";
+      const tag = p.isWinner ? "🏆" : p.voteRestart ? "✓" : "";
       return `<div class="rp-row"><span class="rp-name">${escapeHtml(p.nickname)}</span><span class="rp-tag">${tag}</span></div>`;
     }).join("") || `<div class="rp-row"><span class="rp-name">${this.i18n.t.waiting}</span></div>`;
   }

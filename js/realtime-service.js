@@ -27,7 +27,7 @@ export function makePlayerId(){
 export class RoomSession {
   constructor(code, identity){
     this.code = code;
-    this.state = { id: identity.id, nickname: identity.nickname, voteRestart: false, won: false };
+    this.state = { id: identity.id, nickname: identity.nickname, voteRestart: false, wonRound: -1 };
     this.channel = getClient().channel(ROOM_PREFIX + code, {
       config: { presence: { key: identity.id }, broadcast: { self: true } }
     });
@@ -80,8 +80,8 @@ export class RoomSession {
     return this.channel.track(this.state);
   }
 
-  setWon(value){
-    this.state.won = value;
+  setWonRound(round){
+    this.state.wonRound = round;
     return this.channel.track(this.state);
   }
 

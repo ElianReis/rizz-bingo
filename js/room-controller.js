@@ -96,7 +96,7 @@ export class RoomController {
     this.celebration.fire();
     this.roomView.announce(isSelf ? this.i18n.t.youBingo : `${nickname} ${this.i18n.t.didBingo}`);
     if (isSelf) {
-      if (this.session) this.session.setWon(true);
+      if (this.session) this.session.setWonRound(this.round);
       if (this.service.ready && this.nickname) {
         this.service.submit({ name: this.nickname, ...this.model.snapshot() }).catch(() => {});
       }
@@ -113,10 +113,11 @@ export class RoomController {
     this.players = players;
     const total = players.length;
     const voted = players.filter(p => p.voteRestart).length;
+    players.forEach(p => { p.isWinner = p.wonRound === this.round; });
     this.roomView.setPlayers(players);
     this.roomView.setVote(this.voted, voted, total);
 
-    const winner = players.find(p => p.won);   // presence is the reliable source of truth
+    const winner = players.find(p => p.wonRound === this.round);   // win tied to the current round
     if (winner && !this.locked) this.declareWin(winner.nickname, winner.id === this.myId);
 
     const allVoted = total > 0 && voted === total;
@@ -135,7 +136,6 @@ export class RoomController {
     this.roomView.announce(this.i18n.t.restarting);
     setTimeout(() => this.roomView.announce(""), 1500);
     this.session.setVote(false);
-    this.session.setWon(false);
   }
 
   rebuild(){
